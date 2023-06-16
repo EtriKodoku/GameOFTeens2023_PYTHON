@@ -29,7 +29,9 @@ class DbOperatorPoll(Model):
 
 class UsersDict(dict):
     def __getitem__(self, __key: int) -> DbOperatorPoll:
-        return DbOperatorPoll.get(DbOperatorPoll.chat_id == __key)
+        return DbOperatorPoll.get_or_create(
+            chat_id=__key,
+        )[0]
     
     def __setitem__(self, __key: int, __value: DbOperatorPoll) -> None:
         DbOperatorPoll.get_or_create(
@@ -79,7 +81,9 @@ def zero_q(message):
     zero = message.text
     #user = DbOperatorPoll.create(zero=zero)
     chat_id = message.chat.id
-    user_dict[chat_id].zero = zero
+    user = user_dict[chat_id]
+    user.zero = zero
+    user.save()
     if message.text not in ["Lifecell"]:
         bot.send_message(message.chat.id, text=text.not_lifecell)
     else:
