@@ -47,7 +47,7 @@ class OperatorPoll:
 @bot.message_handler(commands=['life'])
 def life(message):
     bot.register_next_step_handler(message, zero_q)
-    bot.send_message(message.chat.id, text="Розпочнімо опитування. Питання №0: Яким оператором ви користуєтесь?", reply_markup=nav.zero)
+    bot.send_message(message.chat.id, text="Розпочнімо опитування. Питання №0: Яким оператором ви користуєтесь?🤔", reply_markup=nav.zero)
 
 
 def zero_q(message):
@@ -56,10 +56,10 @@ def zero_q(message):
     chat_id = message.chat.id
     user_dict[chat_id] = user
     if message.text not in ["Lifecell"]:
-        bot.send_message(message.chat.id, text="Ми радимо вам перейти на тарифів Lifecell")
+        bot.send_message(message.chat.id, text="Ми радимо вам перейти на тарифи від Lifecell😊")
     else:
-        bot.send_message(message.chat.id, text="Ми раді, що ви довіряєте нам. Продовжимо опитування, щоб підібрати для вас найкращий тариф")
-    bot.send_message(message.chat.id, text="Питання №1.  Чи часто вам потрібно дзвонити на номери інших операторів?", reply_markup=nav.operator)
+        bot.send_message(message.chat.id, text="Ми раді, що ви довіряєте нам❤️. Продовжимо опитування, щоб підібрати для вас найкращий тариф")
+    bot.send_message(message.chat.id, text="Питання №1.  Чи часто вам потрібно дзвонити на номери інших операторів?📞", reply_markup=nav.operator)
     bot.register_next_step_handler(message, operator_q)
 
 
@@ -157,7 +157,7 @@ def calculation(chat_id):
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, text='Вітаємо в телеграм боті. Для подальшого використання бота пропишіть команду "/help" ')
+    bot.send_message(message.chat.id, text='👋Вітаємо в телеграм боті. Для подальшого використання бота пропишіть команду "/help" ')
 
 
 @bot.message_handler(commands=['help'])
