@@ -100,7 +100,7 @@ def calculation(chat_id):
 
 @bot.message_handler(commands=['start'])
 def start(message):
-    bot.send_message(message.chat.id, text="Вітаємо в телеграм боті.")
+    bot.send_message(message.chat.id, text='Вітаємо в телеграм боті. Для подальшого використання бота пропишіть команду "/help" ')
 
 
 @bot.message_handler(commands=['help'])
