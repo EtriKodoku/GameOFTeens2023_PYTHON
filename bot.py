@@ -5,6 +5,7 @@ from dotenv import load_dotenv;
 from telebot import types, custom_filters;
 import markup as nav
 from telebot.handler_backends import State, StatesGroup #States
+from peewee import *
 
 # States storage
 from telebot.storage import StateMemoryStorage
@@ -17,6 +18,28 @@ bot = telebot.TeleBot(os.getenv("TOKEN"))
 
 
 user_dict = {}
+
+db = SqliteDatabase('db.sqlite3')
+class DbOperatorPoll:
+    zero = CharField()
+    operator = CharField()
+    rings = CharField()
+    rings_time = CharField()
+    network = CharField()
+    price = CharField()
+    
+    class Meta:
+        database = db
+    
+    def into_operatorpoll(self) -> OperatorPoll:
+        op = OperatorPoll(self.zero)
+        op.operator = self.operator
+        op.rings = self.rings
+        op.rings_time = self.rings_time
+        op.network = self.network
+        op.price = self.price
+        return op
+
 
 # States group.
 class OperatorPoll:
