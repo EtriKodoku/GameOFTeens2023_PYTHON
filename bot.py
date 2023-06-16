@@ -77,9 +77,9 @@ def life(message):
 
 def zero_q(message):
     zero = message.text
-    user = DbOperatorPoll.create(zero=zero)
+    #user = DbOperatorPoll.create(zero=zero)
     chat_id = message.chat.id
-    user_dict[chat_id] = user
+    user_dict[chat_id].zero = zero
     if message.text not in ["Lifecell"]:
         bot.send_message(message.chat.id, text=text.not_lifecell)
     else:
