@@ -12,21 +12,20 @@ from telebot.storage import StateMemoryStorage
 
 # python-dotenv library is used for saving telegram token so it will not leak to network
 load_dotenv()
+db = SqliteDatabase('db.sqlite3')
+
 
 state_storage=StateMemoryStorage()
 bot = telebot.TeleBot(os.getenv("TOKEN"))
 
-
-user_dict = {}
-
-db = SqliteDatabase('db.sqlite3')
-class DbOperatorPoll:
-    zero = CharField()
-    operator = CharField()
-    rings = CharField()
-    rings_time = CharField()
-    network = CharField()
-    price = CharField()
+class DbOperatorPoll(Model):
+    chat_id = IntegerField(primary_key=True)
+    zero = CharField(NULL = True)
+    operator = CharField(NULL = True)
+    rings = CharField(NULL = True)
+    rings_time = CharField(NULL = True)
+    network = CharField(NULL = True)
+    price = CharField(NULL = True)
     
     class Meta:
         database = db
@@ -41,6 +40,23 @@ class DbOperatorPoll:
         return op
 
 
+class UsersDict(dict):
+    def __getitem__(self, __key: int) -> DbOperatorPoll:
+        return DbOperatorPoll.get(DbOperatorPoll.chat_id == __key)
+    
+    def __setitem__(self, __key: int, __value: DbOperatorPoll) -> None:
+        DbOperatorPoll.get_or_create(
+            chat_id=__key,
+            zero=__value.zero,
+            operator=__value.operator,
+            rings=__value.rings,
+            rings_time=__value.rings_time,
+            network=__value.network,
+            price=__value.price,
+        )
+
+user_dict = {}
+
 # States group.
 class OperatorPoll:
     def __init__(self, zero): 
@@ -50,6 +66,17 @@ class OperatorPoll:
         self.rings_time = None
         self.network = None
         self.price = None
+    
+    def into_dboperatorpoll(self, chat_id: int) -> DbOperatorPoll:
+        DbOperatorPoll(
+            chat_id = chat_id,
+            zero = self.zero,
+            operator = self.operator,
+            rings = self.rings,
+            rings_time = self.rings_time,
+            network = self.network,
+            price = self.price,
+)
 
 
 @bot.message_handler(commands=['life'])
