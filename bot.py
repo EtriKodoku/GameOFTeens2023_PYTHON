@@ -1,19 +1,11 @@
 import os;
-import time;
 import telebot;
 from dotenv import load_dotenv;
-from telebot import types, custom_filters;
 import markup as nav
-from telebot.handler_backends import State, StatesGroup #States
 from peewee import *
-
-# States storage
-from telebot.storage import StateMemoryStorage
 
 # python-dotenv library is used for saving telegram token so it will not leak to network
 load_dotenv()
-
-state_storage=StateMemoryStorage()
 bot = telebot.TeleBot(os.getenv("TOKEN"))
 
 
@@ -143,8 +135,8 @@ def price(message):
         chat_id = message.chat.id
         user_dict[chat_id].price = message.text
         bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
-        text = calculation
-        bot.send_message(chat_id, text=text)
+        calculation_result = calculation
+        bot.send_message(chat_id, text=f'Вам найкраще підійде: {calculation_result}')
 
 
 def calculation(chat_id):
@@ -178,5 +170,5 @@ def help(message):
 def text_handler(chat_id):
     bot.send_message(chat_id, text='Будь ласка виберіть один з варіантів')
 
-        
+
 bot.polling(none_stop=True, interval=0.5)
