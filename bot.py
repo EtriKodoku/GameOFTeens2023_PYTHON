@@ -135,16 +135,18 @@ def price(message):
     if message.text == "Назад":
         bot.send_message(message.chat.id, text="Питання №4. Як ви використовуєте мобільні дані? \n1. Месенджері \n2. Дивлюсь відео, фільми. \n3. Роздаю на комп'ютер \n4.Тримаю ботоферму)", reply_markup=nav.rings)
         bot.register_next_step_handler(message, network)
+        
     elif message.text not in nav.price_buttons:
         bot.send_message(message.chat.id, text="Перепрошую. Я приймаю відповіді тільки такими, якими вони є на кнопках. Використовуйте їх для спілкування зі мною")
         bot.send_message(message.chat.id, text="Питання №5. Скільки ви готові витратити на послуги мобільного зв'язку? \n1. До 200 грн \n2. 200-400 грн \n3. Стільки, скільки потрібно буде для моїх потреб", reply_markup=nav.price)
         bot.register_next_step_handler(message, price)
+        
     else:
         chat_id = message.chat.id
         user_dict[chat_id].price = message.text
         bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
-        text = calculation
-        bot.send_message(chat_id, text=text)
+        calculation_result = calculation
+        bot.send_message(chat_id, text=f'Вам найкраще підійде: {calculation_result}')
 
 
 def calculation(chat_id):
