@@ -105,7 +105,7 @@ def operator_q(message):
         user = user_dict[chat_id]
         user.operator = message.text
         user.save()
-        bot.send_message(message.chat.id, text="Питання №2. Як часто ви дзвоните?📞 \n1. Кілька разів на місяць. \n2. Раз в тиждень. \n3. Кілька разів на тиждень. \n4. Кілька разів на день)", reply_markup=nav.rings)
+        bot.send_message(message.chat.id, text=text.question_2, reply_markup=nav.rings)
         bot.register_next_step_handler(message, ring_q)
 
 
@@ -122,7 +122,7 @@ def ring_q(message):
         user = user_dict[chat_id]
         user.rings = message.text
         user.save()
-        bot.send_message(message.chat.id, text="Питання №3. Скільки часу тривають дзвінки?⏱ \n1.До трьох хвилин \n2. Десять хвилин \n3. Півгодини. \n4. Не кладу слухавку)", reply_markup=nav.rings)
+        bot.send_message(message.chat.id, text=text.question_3, reply_markup=nav.rings)
         bot.register_next_step_handler(message, ring_time)
 
 
@@ -139,7 +139,7 @@ def ring_time(message):
         user = user_dict[chat_id]
         user.rings_time = message.text
         user.save()
-        bot.send_message(message.chat.id, text="Питання №4. Як ви використовуєте мобільні дані?📱 \n1. Месенджері \n2. Дивлюсь відео, фільми. \n3. Роздаю на комп'ютер \n4.Тримаю ботоферму)", reply_markup=nav.rings)
+        bot.send_message(message.chat.id, text=text.question_4, reply_markup=nav.rings)
         bot.register_next_step_handler(message, network)
 
 
@@ -156,7 +156,7 @@ def network(message):
         user = user_dict[chat_id]
         user.network = message.text
         user.save()
-        bot.send_message(message.chat.id, text="Питання №5. Скільки ви готові витратити на послуги мобільного зв'язку?💸 \n1. До 200 грн \n2. 200-400 грн \n3. Стільки, скільки потрібно буде для моїх потреб", reply_markup=nav.price)
+        bot.send_message(message.chat.id, text=text.question_5, reply_markup=nav.price)
         bot.register_next_step_handler(message, price)
 
 
