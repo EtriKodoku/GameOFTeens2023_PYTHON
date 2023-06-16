@@ -1,4 +1,5 @@
-import os;
+import os
+from typing import Any;
 import telebot;
 from dotenv import load_dotenv;
 import markup as nav
@@ -7,32 +8,44 @@ from peewee import *
 
 # python-dotenv library is used for saving telegram token so it will not leak to network
 load_dotenv()
+db = SqliteDatabase('db.sqlite3')
+
+
+#state_storage=StateMemoryStorage()
 bot = telebot.TeleBot(os.getenv("TOKEN"))
 
-
-user_dict = {}
-
-db = SqliteDatabase('db.sqlite3')
-class DbOperatorPoll:
-    zero = CharField()
-    operator = CharField()
-    rings = CharField()
-    rings_time = CharField()
-    network = CharField()
-    price = CharField()
+class DbOperatorPoll(Model):
+    chat_id = IntegerField(primary_key=True)
+    zero = CharField(null=True)
+    operator = CharField(null=True)
+    rings = CharField(null=True)
+    rings_time = CharField(null=True)
+    network = CharField(null=True)
+    price = CharField(null=True)
     
     class Meta:
         database = db
-    
-    def into_operatorpoll(self) -> OperatorPoll:
-        op = OperatorPoll(self.zero)
-        op.operator = self.operator
-        op.rings = self.rings
-        op.rings_time = self.rings_time
-        op.network = self.network
-        op.price = self.price
-        return op
 
+
+class UsersDict(dict):
+    def __getitem__(self, __key: int) -> DbOperatorPoll:
+        return DbOperatorPoll.get(DbOperatorPoll.chat_id == __key)
+    
+    def __setitem__(self, __key: int, __value: DbOperatorPoll) -> None:
+        DbOperatorPoll.get_or_create(
+            chat_id=__key,
+            zero=__value.zero,
+            operator=__value.operator,
+            rings=__value.rings,
+            rings_time=__value.rings_time,
+            network=__value.network,
+            price=__value.price,
+        )
+
+user_dict = UsersDict()
+
+with db:
+    db.create_tables([DbOperatorPoll])
 
 # States group.
 class OperatorPoll:
@@ -43,6 +56,17 @@ class OperatorPoll:
         self.rings_time = None
         self.network = None
         self.price = None
+    
+    def into_dboperatorpoll(self, chat_id: int) -> DbOperatorPoll:
+        DbOperatorPoll(
+            chat_id = chat_id,
+            zero = self.zero,
+            operator = self.operator,
+            rings = self.rings,
+            rings_time = self.rings_time,
+            network = self.network,
+            price = self.price,
+        )
 
 
 @bot.message_handler(commands=['life'])
@@ -53,7 +77,7 @@ def life(message):
 
 def zero_q(message):
     zero = message.text
-    user = OperatorPoll(zero)
+    user = DbOperatorPoll.create(zero=zero)
     chat_id = message.chat.id
     user_dict[chat_id] = user
     if message.text not in ["Lifecell"]:
@@ -74,8 +98,10 @@ def operator_q(message):
         bot.register_next_step_handler(message, operator_q)
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].operator = message.text
-        bot.send_message(message.chat.id, text=text.question_2, reply_markup=nav.rings)
+        user = user_dict[chat_id]
+        user.operator = message.text
+        user.save()
+        bot.send_message(message.chat.id, text="Питання №2. Як часто ви дзвоните?📞 \n1. Кілька разів на місяць. \n2. Раз в тиждень. \n3. Кілька разів на тиждень. \n4. Кілька разів на день)", reply_markup=nav.rings)
         bot.register_next_step_handler(message, ring_q)
 
 
@@ -89,8 +115,10 @@ def ring_q(message):
         bot.register_next_step_handler(message, ring_q)
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].rings = message.text
-        bot.send_message(message.chat.id, text=text.question_3, reply_markup=nav.rings)
+        user = user_dict[chat_id]
+        user.rings = message.text
+        user.save()
+        bot.send_message(message.chat.id, text="Питання №3. Скільки часу тривають дзвінки?⏱ \n1.До трьох хвилин \n2. Десять хвилин \n3. Півгодини. \n4. Не кладу слухавку)", reply_markup=nav.rings)
         bot.register_next_step_handler(message, ring_time)
 
 
@@ -104,8 +132,10 @@ def ring_time(message):
         bot.register_next_step_handler(message, ring_time)
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].rings_time = message.text
-        bot.send_message(message.chat.id, text=text.question_4, reply_markup=nav.rings)
+        user = user_dict[chat_id]
+        user.rings_time = message.text
+        user.save()
+        bot.send_message(message.chat.id, text="Питання №4. Як ви використовуєте мобільні дані?📱 \n1. Месенджері \n2. Дивлюсь відео, фільми. \n3. Роздаю на комп'ютер \n4.Тримаю ботоферму)", reply_markup=nav.rings)
         bot.register_next_step_handler(message, network)
 
 
@@ -119,8 +149,10 @@ def network(message):
         bot.register_next_step_handler(message, network)
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].network = message.text
-        bot.send_message(message.chat.id, text=text.question_5, reply_markup=nav.price)
+        user = user_dict[chat_id]
+        user.network = message.text
+        user.save()
+        bot.send_message(message.chat.id, text="Питання №5. Скільки ви готові витратити на послуги мобільного зв'язку?💸 \n1. До 200 грн \n2. 200-400 грн \n3. Стільки, скільки потрібно буде для моїх потреб", reply_markup=nav.price)
         bot.register_next_step_handler(message, price)
 
 
@@ -136,8 +168,10 @@ def price(message):
         
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].price = message.text
-        bot.send_message(message.chat.id, text=text.wait_calculation)
+        user = user_dict[chat_id]
+        user.price = message.text
+        user.save()
+        bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
         calculation_result = calculation
         bot.send_message(chat_id, text=f'{text.calculated}{calculation_result}')
 
