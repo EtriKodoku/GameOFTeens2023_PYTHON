@@ -7,15 +7,15 @@ zero.add(*zero_buttons)
 
 
 operator = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-operator_buttons = ['Так', 'Ні']
+operator_buttons = ['Так', 'Ні', 'Назад']
 operator.add(*operator_buttons)
 
 
 rings = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-rings_buttons = ['1', '2', '3', '4']
+rings_buttons = ['1', '2', '3', '4', 'Назад']
 rings.add(*rings_buttons)
 
 
 price = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
-price_buttons = ['1', '2', '3']
+price_buttons = ['1', '2', '3', 'Назад']
 price.add(*price_buttons)
