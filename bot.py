@@ -1,19 +1,11 @@
 import os;
-import time;
 import telebot;
 from dotenv import load_dotenv;
-from telebot import types, custom_filters;
 import markup as nav
-from telebot.handler_backends import State, StatesGroup #States
 from peewee import *
-
-# States storage
-from telebot.storage import StateMemoryStorage
 
 # python-dotenv library is used for saving telegram token so it will not leak to network
 load_dotenv()
-
-state_storage=StateMemoryStorage()
 bot = telebot.TeleBot(os.getenv("TOKEN"))
 
 
@@ -180,5 +172,5 @@ def help(message):
 def text_handler(chat_id):
     bot.send_message(chat_id, text='Будь ласка виберіть один з варіантів')
 
-        
+
 bot.polling(none_stop=True, interval=0.5)
