@@ -80,12 +80,22 @@ def price(message):
     chat_id = message.chat.id
     user_dict[chat_id].price = message.text
     bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
-    text = calculation
-    bot.send_message(chat_id, text=text)
+    calculation_result = calculation
+    bot.send_message(chat_id, text=f'Вам найкраще підійде: {calculation_result}')
 
 
 def calculation(chat_id):
     userpoll = user_dict[chat_id]
+    userpoll.network
+    userpoll.rings_time
+    userpoll.rings
+    userpoll.price
+    userpoll.user
+    school = "Шкільний - 150 грн - 7 ГБ - безлім на лайф"
+    simple = "Просто - 160 - 8 ГБ - 300 хв"
+    smart = "Смарт - 225 - 25 ГБ - 800 хв"
+    free = "Вільний 325 - безліміт - 1600 хв"
+    platium = "Платинум - 450 грн - безлім - 3000 хв, безлім на лайф"
 
 
 @bot.message_handler(commands=['start'])
