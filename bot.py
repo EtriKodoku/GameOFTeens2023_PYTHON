@@ -49,39 +49,79 @@ def zero_q(message):
 
 
 def operator_q(message):
-    chat_id = message.chat.id
-    user_dict[chat_id].operator = message.text
-    bot.send_message(message.chat.id, text="Питання №2. Як часто ви дзвоните? \n1. Кілька разів на місяць. \n2. Раз в тиждень. \n3. Кілька разів на тиждень. \n4. Кілька разів на день)", reply_markup=nav.rings)
-    bot.register_next_step_handler(message, ring_q)
+    if message.text == "Назад":
+        bot.send_message(message.chat.id, text="Питання №0: Яким оператором ви користуєтесь?", reply_markup=nav.zero)
+        bot.register_next_step_handler(message, zero_q)
+    elif message.text not in nav.operator_buttons:
+        bot.send_message(message.chat.id, text="Перепрошую. Я приймаю відповіді тільки такими, якими вони є на кнопках. Використовуйте їх для спілкування зі мною")
+        bot.send_message(message.chat.id, text="Питання №1.  Чи часто вам потрібно дзвонити на номери інших операторів?", reply_markup=nav.operator)
+        bot.register_next_step_handler(message, operator_q)
+    else:
+        chat_id = message.chat.id
+        user_dict[chat_id].operator = message.text
+        bot.send_message(message.chat.id, text="Питання №2. Як часто ви дзвоните? \n1. Кілька разів на місяць. \n2. Раз в тиждень. \n3. Кілька разів на тиждень. \n4. Кілька разів на день)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, ring_q)
 
 
 def ring_q(message):
-    chat_id = message.chat.id
-    user_dict[chat_id].rings = message.text
-    bot.send_message(message.chat.id, text="Питання №3. Скільки часу тривають дзвінки? \n1.До трьох хвилин \n2. Десять хвилин \n3. Півгодини. \n4. Не кладу слухавку)", reply_markup=nav.rings)
-    bot.register_next_step_handler(message, ring_time)
+    if message.text == "Назад":
+        bot.send_message(message.chat.id, text="Питання №1.  Чи часто вам потрібно дзвонити на номери інших операторів?", reply_markup=nav.operator)
+        bot.register_next_step_handler(message, operator_q)
+    elif message.text not in nav.rings_buttons:
+        bot.send_message(message.chat.id, text="Перепрошую. Я приймаю відповіді тільки такими, якими вони є на кнопках. Використовуйте їх для спілкування зі мною")
+        bot.send_message(message.chat.id, text="Питання №2. Як часто ви дзвоните? \n1. Кілька разів на місяць. \n2. Раз в тиждень. \n3. Кілька разів на тиждень. \n4. Кілька разів на день)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, ring_q)
+    else:
+        chat_id = message.chat.id
+        user_dict[chat_id].rings = message.text
+        bot.send_message(message.chat.id, text="Питання №3. Скільки часу тривають дзвінки? \n1.До трьох хвилин \n2. Десять хвилин \n3. Півгодини. \n4. Не кладу слухавку)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, ring_time)
 
 
 def ring_time(message):
-    chat_id = message.chat.id
-    user_dict[chat_id].rings_time = message.text
-    bot.send_message(message.chat.id, text="Питання №4. Як ви використовуєте мобільні дані? \n1. Месенджері \n2. Дивлюсь відео, фільми. \n3. Роздаю на комп'ютер \n4.Тримаю ботоферму)", reply_markup=nav.rings)
-    bot.register_next_step_handler(message, network)
+    if message.text == "Назад":
+        bot.send_message(message.chat.id, text="Питання №2. Як часто ви дзвоните? \n1. Кілька разів на місяць. \n2. Раз в тиждень. \n3. Кілька разів на тиждень. \n4. Кілька разів на день)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, ring_q)
+    elif message.text not in nav.rings_buttons:
+        bot.send_message(message.chat.id, text="Перепрошую. Я приймаю відповіді тільки такими, якими вони є на кнопках. Використовуйте їх для спілкування зі мною")
+        bot.send_message(message.chat.id, text="Питання №3. Скільки часу тривають дзвінки? \n1.До трьох хвилин \n2. Десять хвилин \n3. Півгодини. \n4. Не кладу слухавку)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, ring_time)
+    else:
+        chat_id = message.chat.id
+        user_dict[chat_id].rings_time = message.text
+        bot.send_message(message.chat.id, text="Питання №4. Як ви використовуєте мобільні дані? \n1. Месенджері \n2. Дивлюсь відео, фільми. \n3. Роздаю на комп'ютер \n4.Тримаю ботоферму)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, network)
 
 
 def network(message):
-    chat_id = message.chat.id
-    user_dict[chat_id].network = message.text
-    bot.send_message(message.chat.id, text="Питання №5. Скільки ви готові витратити на послуги мобільного зв'язку? \n1. До 200 грн \n2. 200-400 грн \n3. Стільки, скільки потрібно буде для моїх потреб", reply_markup=nav.price)
-    bot.register_next_step_handler(message, price)
+    if message.text == "Назад":
+        bot.send_message(message.chat.id, text="Питання №3. Скільки часу тривають дзвінки? \n1.До трьох хвилин \n2. Десять хвилин \n3. Півгодини. \n4. Не кладу слухавку)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, ring_time)
+    elif message.text not in nav.rings_buttons:
+        bot.send_message(message.chat.id, text="Перепрошую. Я приймаю відповіді тільки такими, якими вони є на кнопках. Використовуйте їх для спілкування зі мною")
+        bot.send_message(message.chat.id, text="Питання №4. Як ви використовуєте мобільні дані? \n1. Месенджері \n2. Дивлюсь відео, фільми. \n3. Роздаю на комп'ютер \n4.Тримаю ботоферму)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, network)
+    else:
+        chat_id = message.chat.id
+        user_dict[chat_id].network = message.text
+        bot.send_message(message.chat.id, text="Питання №5. Скільки ви готові витратити на послуги мобільного зв'язку? \n1. До 200 грн \n2. 200-400 грн \n3. Стільки, скільки потрібно буде для моїх потреб", reply_markup=nav.price)
+        bot.register_next_step_handler(message, price)
 
 
 def price(message):
-    chat_id = message.chat.id
-    user_dict[chat_id].price = message.text
-    bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
-    calculation_result = calculation
-    bot.send_message(chat_id, text=f'Вам найкраще підійде: {calculation_result}')
+    if message.text == "Назад":
+        bot.send_message(message.chat.id, text="Питання №4. Як ви використовуєте мобільні дані? \n1. Месенджері \n2. Дивлюсь відео, фільми. \n3. Роздаю на комп'ютер \n4.Тримаю ботоферму)", reply_markup=nav.rings)
+        bot.register_next_step_handler(message, network)
+    elif message.text not in nav.price_buttons:
+        bot.send_message(message.chat.id, text="Перепрошую. Я приймаю відповіді тільки такими, якими вони є на кнопках. Використовуйте їх для спілкування зі мною")
+        bot.send_message(message.chat.id, text="Питання №5. Скільки ви готові витратити на послуги мобільного зв'язку? \n1. До 200 грн \n2. 200-400 грн \n3. Стільки, скільки потрібно буде для моїх потреб", reply_markup=nav.price)
+        bot.register_next_step_handler(message, price)
+    else:
+        chat_id = message.chat.id
+        user_dict[chat_id].price = message.text
+        bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
+        text = calculation
+        bot.send_message(chat_id, text=text)
 
 
 def calculation(chat_id):
@@ -114,11 +154,6 @@ def help(message):
 @bot.message_handler(content_types=['text'])
 def text_handler(chat_id):
     bot.send_message(chat_id, text='Будь ласка виберіть один з варіантів')
+
         
-        
-    
-    
-
-
-
 bot.polling(none_stop=True, interval=0.5)
