@@ -1,4 +1,5 @@
-import os;
+import os
+from typing import Any;
 import telebot;
 from dotenv import load_dotenv;
 import markup as nav
@@ -9,29 +10,20 @@ load_dotenv()
 db = SqliteDatabase('db.sqlite3')
 
 
-state_storage=StateMemoryStorage()
+#state_storage=StateMemoryStorage()
 bot = telebot.TeleBot(os.getenv("TOKEN"))
 
 class DbOperatorPoll(Model):
     chat_id = IntegerField(primary_key=True)
-    zero = CharField(NULL = True)
-    operator = CharField(NULL = True)
-    rings = CharField(NULL = True)
-    rings_time = CharField(NULL = True)
-    network = CharField(NULL = True)
-    price = CharField(NULL = True)
+    zero = CharField(null=True)
+    operator = CharField(null=True)
+    rings = CharField(null=True)
+    rings_time = CharField(null=True)
+    network = CharField(null=True)
+    price = CharField(null=True)
     
     class Meta:
         database = db
-    
-    def into_operatorpoll(self) -> OperatorPoll:
-        op = OperatorPoll(self.zero)
-        op.operator = self.operator
-        op.rings = self.rings
-        op.rings_time = self.rings_time
-        op.network = self.network
-        op.price = self.price
-        return op
 
 
 class UsersDict(dict):
@@ -49,7 +41,10 @@ class UsersDict(dict):
             price=__value.price,
         )
 
-user_dict = {}
+user_dict = UsersDict()
+
+with db:
+    db.create_tables([DbOperatorPoll])
 
 # States group.
 class OperatorPoll:
@@ -70,7 +65,7 @@ class OperatorPoll:
             rings_time = self.rings_time,
             network = self.network,
             price = self.price,
-)
+        )
 
 
 @bot.message_handler(commands=['life'])
@@ -81,7 +76,7 @@ def life(message):
 
 def zero_q(message):
     zero = message.text
-    user = OperatorPoll(zero)
+    user = DbOperatorPoll.create(zero=zero)
     chat_id = message.chat.id
     user_dict[chat_id] = user
     if message.text not in ["Lifecell"]:
@@ -102,7 +97,9 @@ def operator_q(message):
         bot.register_next_step_handler(message, operator_q)
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].operator = message.text
+        user = user_dict[chat_id]
+        user.operator = message.text
+        user.save()
         bot.send_message(message.chat.id, text="Питання №2. Як часто ви дзвоните?📞 \n1. Кілька разів на місяць. \n2. Раз в тиждень. \n3. Кілька разів на тиждень. \n4. Кілька разів на день)", reply_markup=nav.rings)
         bot.register_next_step_handler(message, ring_q)
 
@@ -117,7 +114,9 @@ def ring_q(message):
         bot.register_next_step_handler(message, ring_q)
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].rings = message.text
+        user = user_dict[chat_id]
+        user.rings = message.text
+        user.save()
         bot.send_message(message.chat.id, text="Питання №3. Скільки часу тривають дзвінки?⏱ \n1.До трьох хвилин \n2. Десять хвилин \n3. Півгодини. \n4. Не кладу слухавку)", reply_markup=nav.rings)
         bot.register_next_step_handler(message, ring_time)
 
@@ -132,7 +131,9 @@ def ring_time(message):
         bot.register_next_step_handler(message, ring_time)
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].rings_time = message.text
+        user = user_dict[chat_id]
+        user.rings_time = message.text
+        user.save()
         bot.send_message(message.chat.id, text="Питання №4. Як ви використовуєте мобільні дані?📱 \n1. Месенджері \n2. Дивлюсь відео, фільми. \n3. Роздаю на комп'ютер \n4.Тримаю ботоферму)", reply_markup=nav.rings)
         bot.register_next_step_handler(message, network)
 
@@ -147,7 +148,9 @@ def network(message):
         bot.register_next_step_handler(message, network)
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].network = message.text
+        user = user_dict[chat_id]
+        user.network = message.text
+        user.save()
         bot.send_message(message.chat.id, text="Питання №5. Скільки ви готові витратити на послуги мобільного зв'язку?💸 \n1. До 200 грн \n2. 200-400 грн \n3. Стільки, скільки потрібно буде для моїх потреб", reply_markup=nav.price)
         bot.register_next_step_handler(message, price)
 
@@ -164,7 +167,9 @@ def price(message):
         
     else:
         chat_id = message.chat.id
-        user_dict[chat_id].price = message.text
+        user = user_dict[chat_id]
+        user.price = message.text
+        user.save()
         bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
         calculation_result = calculation
         bot.send_message(chat_id, text=f'Вам найкраще підійде: {calculation_result}')
