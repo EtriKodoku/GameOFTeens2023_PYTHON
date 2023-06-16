@@ -99,6 +99,16 @@ def help(message):
     /help -- ця команда перекине вас сюди. Тут ви можете дізнатись про мої функції;
     /life -- ця команда розпочне опитування, яке допоможе визначити, який тариф вам підійде
     /support -- """)
+    
+
+@bot.message_handler(content_types=['text'])
+def text_handler(chat_id):
+    bot.send_message(chat_id, text='Будь ласка виберіть один з варіантів')
+        
+        
+    
+    
+
 
 
 bot.polling(none_stop=True, interval=0.5)
