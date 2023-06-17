@@ -6,7 +6,6 @@ from dotenv import load_dotenv
 import markup as nav
 import text
 from peewee import *
-import random
 
 # python-dotenv library is used for saving telegram token so it will not leak to network
 load_dotenv()
