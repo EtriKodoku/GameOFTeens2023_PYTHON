@@ -277,11 +277,6 @@ def call_support(message):
         bot.register_next_step_handler(message, call_support)
     else:
         bot.send_message(message.chat.id, text=text.success_call)
-    
-
-# @bot.message_handler(content_types=['text'])
-# def text_handler(chat_id):
-#     bot.send_message(chat_id, text='Будь ласка виберіть один з варіантів')
 
 
 bot.polling(none_stop=True, interval=0.5)
