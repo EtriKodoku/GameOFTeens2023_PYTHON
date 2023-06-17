@@ -131,7 +131,7 @@ def list_calls(message):
     if is_oper:
         bot.send_message(message.chat.id, message)
     else:
-        bot.send_message(message.chat.id, text="Not operator")
+        bot.send_message(message.chat.id, text=text.not_operator)
 
 
 @bot.message_handler(commands=['life'])
