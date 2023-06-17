@@ -263,6 +263,20 @@ def start(message):
 @bot.message_handler(commands=['help'])
 def help(message):
     bot.send_message(message.chat.id, text=text.help)
+
+
+@bot.message_handler(commands=['support'])
+def support(message):
+    bot.send_message(message.chat.id, text=text.call_support)
+    bot.register_next_step_handler(message, call_support)
+
+
+def call_support(message):
+    if len(message.text) > 1000:
+        bot.send_message(message.chat.id, text=text.too_large)
+        bot.register_next_step_handler(message, call_support)
+    else:
+        bot.send_message(message.chat.id, text=text.success_call)
     
 
 # @bot.message_handler(content_types=['text'])
