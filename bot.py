@@ -1,6 +1,7 @@
 import os
 from typing import Any;
 import telebot;
+from telebot import types;
 from dotenv import load_dotenv;
 import markup as nav
 import text
@@ -10,9 +11,8 @@ from peewee import *
 load_dotenv()
 db = SqliteDatabase('db.sqlite3')
 
-
-#state_storage=StateMemoryStorage()
 bot = telebot.TeleBot(os.getenv("TOKEN"))
+admins = [622662662, 5518302740, 5186086085]
 
 class DbOperatorPoll(Model):
     chat_id = IntegerField(primary_key=True)
@@ -22,6 +22,23 @@ class DbOperatorPoll(Model):
     rings_time = CharField(null=True)
     network = CharField(null=True)
     price = CharField(null=True)
+    
+    class Meta:
+        database = db
+
+
+class Operator(Model):
+    operator_id = IntegerField(primary_key=True)
+    call_id = ForeignKeyField(null=True)
+    
+    class Meta:
+        database = db
+
+
+class Call(Model):
+    customer_id = IntegerField(primary_key=True)
+    discription = CharField(max_length=1000)
+    solved = BooleanField(default=False)
     
     class Meta:
         database = db
@@ -47,7 +64,7 @@ class UsersDict(dict):
 user_dict = UsersDict()
 
 with db:
-    db.create_tables([DbOperatorPoll])
+    db.create_tables([DbOperatorPoll, Operator])
 
 # States group.
 class OperatorPoll:
@@ -71,6 +88,50 @@ class OperatorPoll:
         )
 
 
+def is_operator(message: types.Message) -> bool:
+    # It's filter
+    try:
+        Operator.get(operator_id=message.chat.id)
+        return True
+    except:
+        return False
+
+
+def is_admin(message: types.Message) -> bool:
+    if message.chat.id in admins:
+        return True
+    else:
+        return False
+
+
+@bot.message_handler(commands=["add"])
+def add_operator(message):
+    if is_admin(message):
+        bot.send_message(message.chat.id, text=text.forward)
+        bot.register_next_step_handler(message, register_operator)
+    else:
+        bot.send_message(message.chat.id, text=text.not_admin)
+
+
+def register_operator(message):
+    try:
+        oper = message.forward_from.id
+        Operator.get_or_create(operator_id=oper)
+        bot.send_message(message.chat.id, text=text.registered)
+    except:
+        bot.send_message(message.chat.id, text=text.forward)
+        bot.register_next_step_handler(message, register_operator)
+
+
+@bot.message_handler(commands=['list'])
+def list_calls(message):
+    is_oper = is_operator(message)
+    if is_oper:
+        bot.send_message(message.chat.id, message)
+    else:
+        bot.send_message(message.chat.id, text="Not operator")
+
+
 @bot.message_handler(commands=['life'])
 def life(message):
     bot.register_next_step_handler(message, zero_q)
@@ -79,7 +140,6 @@ def life(message):
 
 def zero_q(message):
     zero = message.text
-    #user = DbOperatorPoll.create(zero=zero)
     chat_id = message.chat.id
     user = user_dict[chat_id]
     user.zero = zero
@@ -204,9 +264,9 @@ def help(message):
     bot.send_message(message.chat.id, text=text.help)
     
 
-@bot.message_handler(content_types=['text'])
-def text_handler(chat_id):
-    bot.send_message(chat_id, text='Будь ласка виберіть один з варіантів')
+# @bot.message_handler(content_types=['text'])
+# def text_handler(chat_id):
+#     bot.send_message(chat_id, text='Будь ласка виберіть один з варіантів')
 
 
 bot.polling(none_stop=True, interval=0.5)
