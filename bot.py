@@ -28,7 +28,8 @@ class DbOperatorPoll(Model):
 
 
 class Call(Model):
-    customer_id = IntegerField(primary_key=True)
+    id = AutoField(primary_key=True)
+    customer_id = IntegerField()
     discription = CharField(max_length=1000)
     solved = BooleanField(default=False)
     
@@ -277,6 +278,8 @@ def call_support(message):
         bot.register_next_step_handler(message, call_support)
     else:
         bot.send_message(message.chat.id, text=text.success_call)
+        Call.create(customer_id=message.chat.id,
+                    discription=message.text)
 
 
 bot.polling(none_stop=True, interval=0.5)
