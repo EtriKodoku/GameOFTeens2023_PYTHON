@@ -1,18 +1,19 @@
 import os
-from typing import Any;
-import telebot;
-from telebot import types;
-from dotenv import load_dotenv;
+from typing import Any
+import telebot
+from telebot import types
+from dotenv import load_dotenv
 import markup as nav
 import text
 from peewee import *
 
 # python-dotenv library is used for saving telegram token so it will not leak to network
 load_dotenv()
-db = SqliteDatabase('db.sqlite3')
+db = SqliteDatabase("db.sqlite3")
 
 bot = telebot.TeleBot(os.getenv("TOKEN"))
 admins = [622662662, 5518302740, 5186086085]
+
 
 class DbOperatorPoll(Model):
     chat_id = IntegerField(primary_key=True)
@@ -22,7 +23,7 @@ class DbOperatorPoll(Model):
     rings_time = CharField(null=True)
     network = CharField(null=True)
     price = CharField(null=True)
-    
+
     class Meta:
         database = db
 
@@ -32,7 +33,7 @@ class Call(Model):
     customer_id = IntegerField()
     discription = CharField(max_length=1000)
     solved = BooleanField(default=False)
-    
+
     class Meta:
         database = db
 
@@ -40,7 +41,7 @@ class Call(Model):
 class Operator(Model):
     operator_id = IntegerField(primary_key=True)
     call_id = ForeignKeyField(null=True, model=Call)
-    
+
     class Meta:
         database = db
 
@@ -50,7 +51,7 @@ class UsersDict(dict):
         return DbOperatorPoll.get_or_create(
             chat_id=__key,
         )[0]
-    
+
     def __setitem__(self, __key: int, __value: DbOperatorPoll) -> None:
         DbOperatorPoll.get_or_create(
             chat_id=__key,
@@ -62,30 +63,32 @@ class UsersDict(dict):
             price=__value.price,
         )
 
+
 user_dict = UsersDict()
 
 with db:
     db.create_tables([DbOperatorPoll, Operator])
 
+
 # States group.
 class OperatorPoll:
-    def __init__(self, zero): 
+    def __init__(self, zero):
         self.zero = zero
         self.operator = None
         self.rings = None
         self.rings_time = None
         self.network = None
         self.price = None
-    
+
     def into_dboperatorpoll(self, chat_id: int) -> DbOperatorPoll:
         DbOperatorPoll(
-            chat_id = chat_id,
-            zero = self.zero,
-            operator = self.operator,
-            rings = self.rings,
-            rings_time = self.rings_time,
-            network = self.network,
-            price = self.price,
+            chat_id=chat_id,
+            zero=self.zero,
+            operator=self.operator,
+            rings=self.rings,
+            rings_time=self.rings_time,
+            network=self.network,
+            price=self.price,
         )
 
 
@@ -125,7 +128,7 @@ def register_operator(message):
         bot.register_next_step_handler(message, register_operator)
 
 
-@bot.message_handler(commands=['list'])
+@bot.message_handler(commands=["list"])
 def list_calls(message):
     is_oper = is_operator(message)
     if is_oper:
@@ -134,10 +137,12 @@ def list_calls(message):
         bot.send_message(message.chat.id, text="Not operator")
 
 
-@bot.message_handler(commands=['life'])
+@bot.message_handler(commands=["life"])
 def life(message):
     bot.register_next_step_handler(message, zero_q)
-    bot.send_message(message.chat.id, text=text.start_m+text.question_0, reply_markup=nav.zero)
+    bot.send_message(
+        message.chat.id, text=text.start_m + text.question_0, reply_markup=nav.zero
+    )
 
 
 def zero_q(message):
@@ -160,7 +165,9 @@ def operator_q(message):
         bot.register_next_step_handler(message, zero_q)
     elif message.text not in nav.operator_buttons:
         bot.send_message(message.chat.id, text=text.wrong_answer)
-        bot.send_message(message.chat.id, text=text.question_1, reply_markup=nav.operator)
+        bot.send_message(
+            message.chat.id, text=text.question_1, reply_markup=nav.operator
+        )
         bot.register_next_step_handler(message, operator_q)
     else:
         chat_id = message.chat.id
@@ -173,7 +180,9 @@ def operator_q(message):
 
 def ring_q(message):
     if message.text == "Назад":
-        bot.send_message(message.chat.id, text=text.question_1, reply_markup=nav.operator)
+        bot.send_message(
+            message.chat.id, text=text.question_1, reply_markup=nav.operator
+        )
         bot.register_next_step_handler(message, operator_q)
     elif message.text not in nav.rings_buttons:
         bot.send_message(message.chat.id, text=text.wrong_answer)
@@ -226,26 +235,31 @@ def price(message):
     if message.text == "Назад":
         bot.send_message(message.chat.id, text=text.question_4, reply_markup=nav.rings)
         bot.register_next_step_handler(message, network)
-        
+
     elif message.text not in nav.price_buttons:
         bot.send_message(message.chat.id, text=text.wrong_answer)
         bot.send_message(message.chat.id, text=text.question_5, reply_markup=nav.price)
         bot.register_next_step_handler(message, price)
-        
+
     else:
         chat_id = message.chat.id
         user = user_dict[chat_id]
         user.price = message.text
         user.save()
-        bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
+        bot.send_message(
+            message.chat.id,
+            text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме",
+        )
         calculation_result = calculation(chat_id)
-        bot.send_message(chat_id, text=f'{text.calculated}{calculation_result}')
+        bot.send_message(chat_id, text=f"{text.calculated}{calculation_result}")
+
 
 school = "Шкільний - 150 грн - 7 ГБ - безлім на лайф"
 simple = "Просто - 160 - 8 ГБ - 300 хв"
 smart = "Смарт - 225 - 25 ГБ - 800 хв"
 free = "Вільний 325 - безліміт - 1600 хв"
 platium = "Платинум - 450 грн - безлім - 3000 хв, безлім на лайф"
+
 
 def calculation(chat_id):
     user = user_dict[chat_id]
@@ -263,10 +277,9 @@ def calculation(chat_id):
     tarif_score = score_by_network(tarif_score, user.network)
     tarif_score = score_by_price(tarif_score, user.price)
 
-
     key = max(tarif_score, key=tarif_score.get)
-    
-    return key# + str(tarif_score)
+
+    return key  # + str(tarif_score)
 
 
 def score_by_price(scores: dict, price) -> dict:
@@ -274,12 +287,13 @@ def score_by_price(scores: dict, price) -> dict:
         scores[school] += 1
         scores[simple] += 1
     elif price == "2":
-        scores[free] +=1
+        scores[free] += 1
     elif price == "3":
         scores[smart] += 1
     elif price == "4":
         scores[free] += 1
     return scores
+
 
 def score_by_zero(scores: dict, zero) -> dict:
     if zero == "Vodafone":
@@ -287,7 +301,7 @@ def score_by_zero(scores: dict, zero) -> dict:
         scores[simple] += 1
     elif zero == "Lifecell":
         scores[school] += 1
-        scores[platium] +=1
+        scores[platium] += 1
     return scores
 
 
@@ -297,7 +311,7 @@ def score_by_operator(scores: dict, operator) -> dict:
         scores[smart] += 1
     elif operator == "Ні":
         scores[school] += 1
-        scores[platium] +=1
+        scores[platium] += 1
     return scores
 
 
@@ -314,8 +328,9 @@ def score_by_rings(scores: dict, rings) -> dict:
         scores[smart] += 1
     elif rings == "4":
         scores[free] += 1
-        scores[platium] +=1
+        scores[platium] += 1
     return scores
+
 
 def score_by_rings_time(scores: dict, rings_time) -> dict:
     if rings_time == "1":
@@ -330,7 +345,7 @@ def score_by_rings_time(scores: dict, rings_time) -> dict:
         scores[smart] += 1
     elif rings_time == "4":
         scores[free] += 1
-        scores[platium] +=1
+        scores[platium] += 1
     return scores
 
 
@@ -339,9 +354,9 @@ def score_by_network(scores: dict, network) -> dict:
         scores[school] += 1
         scores[simple] += 1
     elif network == "2":
-        scores[simple] +=1
+        scores[simple] += 1
         scores[smart] += 1
-        scores[free] +=1
+        scores[free] += 1
     elif network == "3":
         scores[smart] += 1
         scores[free] += 1
@@ -349,18 +364,17 @@ def score_by_network(scores: dict, network) -> dict:
     return scores
 
 
-
-@bot.message_handler(commands=['start'])
+@bot.message_handler(commands=["start"])
 def start(message):
     bot.send_message(message.chat.id, text=text.greetings)
 
 
-@bot.message_handler(commands=['help'])
+@bot.message_handler(commands=["help"])
 def help(message):
     bot.send_message(message.chat.id, text=text.help)
 
 
-@bot.message_handler(commands=['support'])
+@bot.message_handler(commands=["support"])
 def support(message):
     bot.send_message(message.chat.id, text=text.call_support)
     bot.register_next_step_handler(message, call_support)
@@ -372,8 +386,7 @@ def call_support(message):
         bot.register_next_step_handler(message, call_support)
     else:
         bot.send_message(message.chat.id, text=text.success_call)
-        Call.create(customer_id=message.chat.id,
-                    discription=message.text)
+        Call.create(customer_id=message.chat.id, discription=message.text)
 
 
 bot.polling(none_stop=True, interval=0.5)
