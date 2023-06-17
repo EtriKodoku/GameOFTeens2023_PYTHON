@@ -6,6 +6,7 @@ from dotenv import load_dotenv;
 import markup as nav
 import text
 from peewee import *
+import random
 
 # python-dotenv library is used for saving telegram token so it will not leak to network
 load_dotenv()
@@ -65,7 +66,7 @@ class UsersDict(dict):
 user_dict = UsersDict()
 
 with db:
-    db.create_tables([DbOperatorPoll, Operator])
+    db.create_tables([DbOperatorPoll, Operator, Call])
 
 # States group.
 class OperatorPoll:
@@ -125,13 +126,57 @@ def register_operator(message):
         bot.register_next_step_handler(message, register_operator)
 
 
+def get_random_call(message, el=0):
+    calls = Call.select().where(Call.solved == False)
+    if len(calls) == 0:
+        bot.send_message(message.chat.id, text=text.empty)
+    else:
+        try:
+            call = calls[el]
+        except:
+            el = 0
+            call = calls[el]
+        bot.send_message(message.chat.id, text=call.discription)
+        bot.send_message(message.chat.id, text=text.call_answer)
+        bot.register_next_step_handler(message, answer, calls, el)
+
+
 @bot.message_handler(commands=['list'])
 def list_calls(message):
     is_oper = is_operator(message)
     if is_oper:
-        bot.send_message(message.chat.id, message)
+        get_random_call(message)
     else:
         bot.send_message(message.chat.id, text=text.not_operator)
+
+
+def show_call(message):
+    call = Call.get(id=int(message.text))
+    bot.send_message(message.chat.id, text=call.discription)
+    bot.send_message(message.chat.id, text=text.call_answer)
+    bot.register_next_step_handler(message, answer, call)
+
+
+def answer(message, calls, el):
+    if message.text == "Інше":
+        el += 1
+        get_random_call(message, el)
+    elif message.text == "Скасувати":
+        bot.send_message(message.chat.id, text=text.end)
+    else:
+        call = calls[el]
+        bot.send_message(call.customer_id, text=text.operator_answer+message.text)
+        call.solved = True
+        call.save()
+        bot.send_message(message.chat.id, text=text.solved, reply_markup=nav.solving)
+        bot.register_next_step_handler(message, stop_or_continue, el)
+
+
+def stop_or_continue(message, el):
+    if message.text == "Так":
+        get_random_call(message, el)
+    else:
+        pass
 
 
 @bot.message_handler(commands=['life'])

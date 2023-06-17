@@ -19,3 +19,8 @@ rings.add(*rings_buttons)
 price = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
 price_buttons = ['1', '2', '3', 'Назад']
 price.add(*price_buttons)
+
+
+solving = types.ReplyKeyboardMarkup(one_time_keyboard=True, resize_keyboard=True)
+solving_buttons = ['Так', 'Ні']
+solving.add(*solving_buttons)
