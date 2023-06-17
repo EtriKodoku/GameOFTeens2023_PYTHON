@@ -27,18 +27,18 @@ class DbOperatorPoll(Model):
         database = db
 
 
-class Operator(Model):
-    operator_id = IntegerField(primary_key=True)
-    call_id = ForeignKeyField(null=True)
+class Call(Model):
+    customer_id = IntegerField(primary_key=True)
+    discription = CharField(max_length=1000)
+    solved = BooleanField(default=False)
     
     class Meta:
         database = db
 
 
-class Call(Model):
-    customer_id = IntegerField(primary_key=True)
-    discription = CharField(max_length=1000)
-    solved = BooleanField(default=False)
+class Operator(Model):
+    operator_id = IntegerField(primary_key=True)
+    call_id = ForeignKeyField(null=True, model=Call)
     
     class Meta:
         database = db
@@ -118,7 +118,8 @@ def register_operator(message):
         oper = message.forward_from.id
         Operator.get_or_create(operator_id=oper)
         bot.send_message(message.chat.id, text=text.registered)
-    except:
+    except Exception as e:
+        print(e)
         bot.send_message(message.chat.id, text=text.forward)
         bot.register_next_step_handler(message, register_operator)
 
