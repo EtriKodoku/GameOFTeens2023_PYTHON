@@ -237,22 +237,119 @@ def price(message):
         user.price = message.text
         user.save()
         bot.send_message(message.chat.id, text="Секундочку. Підбираємо тариф, який вам ідеально пасуватиме")
-        calculation_result = calculation
+        calculation_result = calculation(chat_id)
         bot.send_message(chat_id, text=f'{text.calculated}{calculation_result}')
 
+school = "Шкільний - 150 грн - 7 ГБ - безлім на лайф"
+simple = "Просто - 160 - 8 ГБ - 300 хв"
+smart = "Смарт - 225 - 25 ГБ - 800 хв"
+free = "Вільний 325 - безліміт - 1600 хв"
+platium = "Платинум - 450 грн - безлім - 3000 хв, безлім на лайф"
 
 def calculation(chat_id):
-    userpoll = user_dict[chat_id]
-    userpoll.network
-    userpoll.rings_time
-    userpoll.rings
-    userpoll.price
-    userpoll.user
-    school = "Шкільний - 150 грн - 7 ГБ - безлім на лайф"
-    simple = "Просто - 160 - 8 ГБ - 300 хв"
-    smart = "Смарт - 225 - 25 ГБ - 800 хв"
-    free = "Вільний 325 - безліміт - 1600 хв"
-    platium = "Платинум - 450 грн - безлім - 3000 хв, безлім на лайф"
+    user = user_dict[chat_id]
+    tarif_score = {
+        school: 0,
+        simple: 0,
+        smart: 0,
+        free: 0,
+        platium: 0,
+    }
+    tarif_score = score_by_zero(tarif_score, user.zero)
+    tarif_score = score_by_operator(tarif_score, user.operator)
+    tarif_score = score_by_rings(tarif_score, user.rings)
+    tarif_score = score_by_rings_time(tarif_score, user.rings_time)
+    tarif_score = score_by_network(tarif_score, user.network)
+    tarif_score = score_by_price(tarif_score, user.price)
+
+    for key in tarif_score.keys():
+        max = [0, None]
+        if tarif_score[key] > max[0]:
+            max[0] = tarif_score[key]
+            max[1] = key
+    
+    return key
+
+
+def score_by_price(scores: dict, price) -> dict:
+    if price == "1":
+        scores[school] += 1
+        scores[simple] += 1
+    elif price == "2":
+        scores[free] +=1
+    elif price == "3":
+        scores[smart] += 1
+    elif price == "4":
+        scores[free] += 1
+    return scores
+
+def score_by_zero(scores: dict, zero) -> dict:
+    if zero == "Vodafone":
+        scores[school] += 1
+        scores[simple] += 1
+    elif zero == "Lifecell":
+        scores[school] += 1
+        scores[platium] +=1
+    return scores
+
+
+def score_by_operator(scores: dict, operator) -> dict:
+    if operator == "Так":
+        scores[free] += 1
+        scores[smart] += 1
+    elif operator == "Ні":
+        scores[school] += 1
+        scores[platium] +=1
+    return scores
+
+
+def score_by_rings(scores: dict, rings) -> dict:
+    if rings == "1":
+        scores[school] += 1
+        scores[simple] += 1
+    elif rings == "2":
+        scores[school] += 1
+        scores[simple] += 1
+    elif rings == "3":
+        scores[school] += 1
+        scores[simple] += 1
+        scores[smart] += 1
+    elif rings == "4":
+        scores[free] += 1
+        scores[platium] +=1
+    return scores
+
+def score_by_rings_time(scores: dict, rings_time) -> dict:
+    if rings_time == "1":
+        scores[school] += 1
+        scores[simple] += 1
+    elif rings_time == "2":
+        scores[school] += 1
+        scores[simple] += 1
+    elif rings_time == "3":
+        scores[school] += 1
+        scores[simple] += 1
+        scores[smart] += 1
+    elif rings_time == "4":
+        scores[free] += 1
+        scores[platium] +=1
+    return scores
+
+
+def score_by_network(scores: dict, network) -> dict:
+    if network == "1":
+        scores[school] += 1
+        scores[simple] += 1
+    elif network == "2":
+        scores[simple] +=1
+        scores[smart] += 1
+        scores[free] +=1
+    elif network == "3":
+        scores[smart] += 1
+        scores[free] += 1
+        scores[platium] += 1
+    return scores
+
 
 
 @bot.message_handler(commands=['start'])
