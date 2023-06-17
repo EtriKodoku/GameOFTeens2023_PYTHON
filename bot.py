@@ -266,7 +266,7 @@ def calculation(chat_id):
 
     key = max(tarif_score, key=tarif_score.get)
     
-    return key + str(tarif_score)
+    return key# + str(tarif_score)
 
 
 def score_by_price(scores: dict, price) -> dict:
