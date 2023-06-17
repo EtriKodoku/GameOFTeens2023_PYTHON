@@ -129,6 +129,21 @@ def register_operator(message):
         bot.register_next_step_handler(message, register_operator)
 
 
+def get_random_call(message, el=0):
+    calls = Call.select().where(Call.solved == False)
+    if len(calls) == 0:
+        bot.send_message(message.chat.id, text=text.empty)
+    else:
+        try:
+            call = calls[el]
+        except:
+            el = 0
+            call = calls[el]
+        bot.send_message(message.chat.id, text=call.discription)
+        bot.send_message(message.chat.id, text=text.call_answer)
+        bot.register_next_step_handler(message, answer, calls, el)
+
+
 @bot.message_handler(commands=['list'])
 def list_calls(message):
     is_oper = is_operator(message)
