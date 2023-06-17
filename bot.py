@@ -144,7 +144,7 @@ def get_random_call(message, el=0):
         bot.register_next_step_handler(message, answer, calls, el)
 
 
-@bot.message_handler(commands=['list'])
+@bot.message_handler(commands=["list"])
 def list_calls(message):
     is_oper = is_operator(message)
     if is_oper:
@@ -168,7 +168,7 @@ def answer(message, calls, el):
         bot.send_message(message.chat.id, text=text.end)
     else:
         call = calls[el]
-        bot.send_message(call.customer_id, text=text.operator_answer+message.text)
+        bot.send_message(call.customer_id, text=text.operator_answer + message.text)
         call.solved = True
         call.save()
         bot.send_message(message.chat.id, text=text.solved, reply_markup=nav.solving)
