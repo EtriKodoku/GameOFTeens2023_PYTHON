@@ -264,11 +264,7 @@ def calculation(chat_id):
     tarif_score = score_by_price(tarif_score, user.price)
 
 
-    for key in tarif_score.keys():
-        max = [0, None]
-        if tarif_score[key] > max[0]:
-            max[0] = tarif_score[key]
-            max[1] = key
+    key = max(tarif_score, key=tarif_score.get)
     
     return key + str(tarif_score)
 
